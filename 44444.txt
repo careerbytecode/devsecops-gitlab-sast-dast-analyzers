@@ -1,0 +1,6 @@
+devsecops-gitlab-simple
+devsecops-gitlab-sonarcloud-sast-with-code-coverage
+devsecops-gitlab-sonarcloud-sast-no-code-coverage
+devsecops-gitlab-sast-dast-analyzers
+devsecops-gitlab-dast-using-owasp_zap
+devsecops-gitlab-sca-using-snyk

@@ -1,0 +1,45 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  SAST_EXPERIMENTAL_FEATURES: "true"
+  DAST_WEBSITE: http://www.example.com
+  DAST_FULL_SCAN_ENABLED: "true" 
+  DAST_BROWSER_SCAN: "true"
+
+stages:
+  - test
+  - runSASTScanUsingSonarCloud
+  - runSCAScanUsingSnyk
+  - runDASTScanUsingZAP
+  - dast
+
+run-sast-job:
+    stage: runSASTScanUsingSonarCloud
+    image: maven:3.8.5-openjdk-17-slim
+    script: |
+      mvn verify package sonar:sonar -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.organization=Careerbytecode -Dsonar.projectKey=Careerbytecode -Dsonar.token=token01 
+
+run-sca-job:
+    stage: runSCAScanUsingSnyk
+    image: maven:3.8.5-openjdk-17-slim
+    script: |
+      SNYK_TOKEN='token02'
+      export SNYK_TOKEN
+      mvn snyk:test -fn 
+      
+run-dast-job:
+    stage: runDASTScanUsingZAP
+    image: maven:3.8.5-openjdk-17-slim
+    script: |
+      apt-get update
+      apt-get -y install wget
+      wget https://github.com/zaproxy/zaproxy/releases/download/v2.14.0/ZAP_2.14.0_Linux.tar.gz
+      mkdir zap
+      tar -xvf ZAP_2.14.0_Linux.tar.gz
+      cd ZAP_2.14.0
+      ./zap.sh -cmd -quickurl https://www.example.com -quickprogress -quickout ../zap_report.html 
+    artifacts:
+      paths:
+        - zap_report.html 
